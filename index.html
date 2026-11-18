@@ -26,18 +26,15 @@ async function startApp(){
         baseLayerPicker:true
     });
 
-    //限定渲染范围，刚好包住5个标记点的澜沧江流域
+    // 初始镜头定位到澜沧江区域（不锁死视野，可以拖到全球）
     const lancangExtent = Cesium.Rectangle.fromDegrees(94, 22, 101, 35);
-    viewer.scene.globe.cartographicLimitRectangle = lancangExtent;
-
-    //镜头初始化铺满整个澜沧江流域
     viewer.camera.flyTo({
         destination:lancangExtent,
         orientation:{heading:0,pitch:Cesium.Math.toRadians(-45),roll:0},
         duration:1
     });
 
-    //蓝色河线，完整串联5个标点对应的河段（全部中国境内）
+    //蓝色河线串联全部5个标点，中国境内澜沧江
     const riverCoords = [
         [94.78,33.85],   //①源头
         [95.40,32.90],
@@ -63,7 +60,7 @@ async function startApp(){
         name:"澜沧江（中国境内）"
     });
 
-    // 全部5个红色标点
+    //5个红色标记点
     const points = [
         {name:"①澜沧江源头",lon:94.8,lat:33.9,height:30000},
         {name:"②上游峡谷",lon:98.9,lat:28.5,height:22000},
