@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>澜沧江‑湄公河三维漫游</title>
+    <title>澜沧江‑湄公河三维漫游（高精度河道）</title>
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
@@ -39,47 +39,67 @@ async function startApp(){
         duration:1.2
     });
 
-    //贴合真实澜湄干流采样点
+    //【加密采样点】严格跟随澜湄干流河谷弯曲走向，不再大段直线
     const riverCoords = [
-        [94.69,33.71],  //①扎阿曲源头
-        [95.32,32.80],
-        [96.11,31.42],
-        [97.14,31.06],
-        [97.75,29.94],
-        [98.36,28.84],
-        [98.72,28.15],  //②三江并流
-        [99.04,27.22],
-        [99.41,25.80],
-        [99.83,24.41],
-        [100.27,23.22],
-        [100.82,21.90], //③西双版纳出境冲积扇地貌
-        [101.60,20.21],
-        [102.18,19.87],
-        [102.62,17.93],
-        [104.77,17.43], //④泰国‑老挝界河
-        [105.78,15.12],
-        [106.02,13.54],
-        [106.75,10.19]  //⑤越南湄公河三角洲入海口
+        [94.68,33.74],  //①扎阿曲源头 唐古拉山吉富山正源
+        [94.94,33.22],
+        [95.33,32.76],
+        [95.74,32.11],
+        [96.16,31.48],
+        [96.63,31.24],
+        [97.12,31.04],  //昌都，扎曲昂曲汇合，始称澜沧江
+        [97.34,30.47],
+        [97.61,29.83],
+        [97.93,29.26],
+        [98.22,28.74],
+        [98.71,28.13],  //②横断山区 三江并流核心峡谷
+        [98.88,27.60],
+        [99.07,27.01],
+        [99.24,26.43],
+        [99.42,25.76],
+        [99.61,25.12],
+        [99.78,24.54],
+        [99.97,23.90],
+        [100.21,23.27],
+        [100.44,22.64],
+        [100.72,22.17],
+        [101.08,21.55], //③西双版纳南腊河口·出境冲积扇（国界）
+        [101.33,21.02],
+        [101.56,20.46],
+        [101.84,20.04],
+        [102.16,19.86], //琅勃拉邦
+        [102.43,18.82],
+        [102.64,17.93], //万象
+        [103.27,17.61],
+        [104.77,17.43], //④泰国‑老挝界河（那空帕农，泰国流域）
+        [105.12,16.31],
+        [105.48,15.34], //巴色
+        [105.83,14.40],
+        [106.04,13.52], //上丁（柬埔寨）
+        [106.22,12.47],
+        [106.41,11.36],
+        [106.64,10.22]  //⑤越南湄公河九龙江三角洲入海口
     ];
+
     const riverPoints = riverCoords.map(ll=>Cesium.Cartesian3.fromDegrees(ll[0],ll[1]));
 
     viewer.entities.add({
         polyline:{
             positions:riverPoints,
-            width:6,
-            material:Cesium.Color.CORNFLOWERBLUE.withAlpha(0.88),
+            width:7,
+            material:Cesium.Color.CORNFLOWERBLUE.withAlpha(0.90),
             clampToGround:true
         },
-        name:"澜沧江‑湄公河干流"
+        name:"澜沧江‑湄公河干流（加密采样）"
     });
 
-    //5个标记点
+    //5个地貌站点标记
     const points = [
-        {name:"①唐古拉山·扎阿曲（源头）",lon:94.69,lat:33.71,height:31000},
-        {name:"②横断山区·三江并流",lon:98.72,lat:28.15,height:25000},
-        {name:"③西双版纳·出境冲积扇",lon:100.82,lat:21.90,height:21000},
-        {name:"④泰国‑老挝界河（泰国流域）",lon:104.77,lat:17.43,height:23000},
-        {name:"⑤越南湄公河三角洲入海口",lon:106.75,lat:10.19,height:27000}
+        {name:"①唐古拉山·扎阿曲（澜湄正源）",lon:94.68,lat:33.74,height:31000},
+        {name:"②横断山区·三江并流峡谷",lon:98.71,lat:28.13,height:25000},
+        {name:"③西双版纳·南腊河口冲积扇(出境)",lon:101.08,lat:21.55,height:21000},
+        {name:"④泰老界河·泰国流域河段",lon:104.77,lat:17.43,height:23000},
+        {name:"⑤越南湄公河·九龙江三角洲入海口",lon:106.64,lat:10.22,height:27000}
     ];
 
     points.forEach(p=>{
@@ -91,6 +111,7 @@ async function startApp(){
         entity.flyHeight = p.height;
     });
 
+    //点击标记镜头跳转
     viewer.selectedEntityChanged.addEventListener(entity=>{
         if(!entity)return;
         viewer.camera.flyTo({
@@ -104,6 +125,7 @@ async function startApp(){
         })
     });
 
+    //沿河漫游
     function startRiverFly(){
         let idx = 0;
         function next(){
@@ -112,7 +134,7 @@ async function startApp(){
             viewer.camera.flyTo({
                 destination:Cesium.Cartesian3.fromDegrees(lon,lat,17000),
                 orientation:{heading:0,pitch:Cesium.Math.toRadians(-43),roll:0},
-                duration:1.9,
+                duration:1.4,
                 complete:function(){
                     idx++;
                     next();
