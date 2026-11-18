@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>澜沧江‑湄公河 源头至入海口三维漫游</title>
+    <title>澜沧江三维漫游（中国境内河段）</title>
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
@@ -26,29 +26,31 @@ async function startApp(){
         baseLayerPicker:true
     });
 
-    // ===================== 绘制澜沧江‑湄公河干流蓝色河线（贴地形）=====================
+    //限定渲染范围，刚好包住5个标记点的澜沧江流域
+    const lancangExtent = Cesium.Rectangle.fromDegrees(94, 22, 101, 35);
+    viewer.scene.globe.cartographicLimitRectangle = lancangExtent;
+
+    //镜头初始化铺满整个澜沧江流域
+    viewer.camera.flyTo({
+        destination:lancangExtent,
+        orientation:{heading:0,pitch:Cesium.Math.toRadians(-45),roll:0},
+        duration:1
+    });
+
+    //蓝色河线，完整串联5个标点对应的河段（全部中国境内）
     const riverCoords = [
-        [94.78,33.85],
+        [94.78,33.85],   //①源头
         [95.40,32.90],
         [96.20,31.70],
         [97.10,30.40],
         [98.20,29.20],
-        [98.85,28.45],
+        [98.85,28.45],   //②上游峡谷
         [99.25,27.80],
         [99.70,26.10],
-        [100.12,22.75],
-        [100.50,21.30],
-        [101.10,19.90],
-        [101.70,18.20],
-        [102.40,17.40],
-        [103.15,17.65],
-        [103.80,16.20],
-        [104.60,14.80],
-        [105.30,13.10],
-        [105.80,11.50],
-        [106.32,10.18]
+        [100.00,24.20],  //③出山口
+        [100.08,23.40],  //④中下游
+        [100.12,22.75]   //⑤出境口（终点）
     ];
-    //经纬度转Cartesian3
     const riverPoints = riverCoords.map(ll=>Cesium.Cartesian3.fromDegrees(ll[0],ll[1]));
 
     viewer.entities.add({
@@ -56,18 +58,18 @@ async function startApp(){
             positions:riverPoints,
             width:6,
             material:Cesium.Color.CORNFLOWERBLUE.withAlpha(0.85),
-            clampToGround:true  //贴地形，顺着峡谷起伏
+            clampToGround:true
         },
-        name:"澜沧江‑湄公河干流"
+        name:"澜沧江（中国境内）"
     });
 
-    // 点位：源头、上游、出山口、中下游、入海口
+    // 全部5个红色标点
     const points = [
-        {name:"源头",lon:94.8,lat:33.9,height:30000},
-        {name:"上游峡谷",lon:98.9,lat:28.5,height:22000},
-        {name:"横断山出山口",lon:100.1,lat:22.8,height:18000},
-        {name:"中下游河谷",lon:103.2,lat:17.7,height:20000},
-        {name:"湄公河入海口",lon:106.3,lat:10.2,height:25000}
+        {name:"①澜沧江源头",lon:94.8,lat:33.9,height:30000},
+        {name:"②上游峡谷",lon:98.9,lat:28.5,height:22000},
+        {name:"③横断山出山口",lon:100.0,lat:24.2,height:20000},
+        {name:"④中下游河谷",lon:100.08,lat:23.4,height:19000},
+        {name:"⑤西双版纳出境口",lon:100.12,lat:22.75,height:18000}
     ];
 
     points.forEach(p=>{
@@ -98,4 +100,3 @@ startApp();
 </script>
 </body>
 </html>
-
