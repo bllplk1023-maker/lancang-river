@@ -16,7 +16,6 @@
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6InFVUnd3QXU2NFBMTzhzMGYiLCJqdGkiOiI4N2ExYjkxOS1jODlmLTQzNjMtOGRkOS00MjkzNDE3ZDRjNzIiLCJpZCI6NTUyMDkwLCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3OTUwMDkzMjN9.crDnPsRtQP_YNs__ujX5ugLVs3Bq3CSisclhtdG5tj0";
 
 async function startApp(){
-    //新版地形写法
     const viewer = new Cesium.Viewer('cesiumContainer',{
         terrain:Cesium.Terrain.fromWorldTerrain({
             requestWaterMask:true,
@@ -27,7 +26,42 @@ async function startApp(){
         baseLayerPicker:true
     });
 
-    //点位：源头、上游、出山口、中下游、入海口
+    // ===================== 绘制澜沧江‑湄公河干流蓝色河线（贴地形）=====================
+    const riverCoords = [
+        [94.78,33.85],
+        [95.40,32.90],
+        [96.20,31.70],
+        [97.10,30.40],
+        [98.20,29.20],
+        [98.85,28.45],
+        [99.25,27.80],
+        [99.70,26.10],
+        [100.12,22.75],
+        [100.50,21.30],
+        [101.10,19.90],
+        [101.70,18.20],
+        [102.40,17.40],
+        [103.15,17.65],
+        [103.80,16.20],
+        [104.60,14.80],
+        [105.30,13.10],
+        [105.80,11.50],
+        [106.32,10.18]
+    ];
+    //经纬度转Cartesian3
+    const riverPoints = riverCoords.map(ll=>Cesium.Cartesian3.fromDegrees(ll[0],ll[1]));
+
+    viewer.entities.add({
+        polyline:{
+            positions:riverPoints,
+            width:6,
+            material:Cesium.Color.CORNFLOWERBLUE.withAlpha(0.85),
+            clampToGround:true  //贴地形，顺着峡谷起伏
+        },
+        name:"澜沧江‑湄公河干流"
+    });
+
+    // 点位：源头、上游、出山口、中下游、入海口
     const points = [
         {name:"源头",lon:94.8,lat:33.9,height:30000},
         {name:"上游峡谷",lon:98.9,lat:28.5,height:22000},
@@ -64,3 +98,4 @@ startApp();
 </script>
 </body>
 </html>
+
