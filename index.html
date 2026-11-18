@@ -7,10 +7,16 @@
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
         html,body,#cesiumContainer{width:100%;height:100%;margin:0;padding:0;overflow:hidden;}
+        #control{position:absolute;top:12px;left:12px;z-index:99;padding:8px;background:rgba(0,0,0,0.65);color:#fff;border-radius:6px;}
+        button{padding:4px 10px;margin:0 4px;cursor:pointer;}
     </style>
 </head>
 <body>
 <div id="cesiumContainer"></div>
+<div id="control">
+    <button id="playBtn">开始沿河漫游</button>
+    <button id="stopBtn">停止漫游</button>
+</div>
 
 <script>
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6InFVUnd3QXU2NFBMTzhzMGYiLCJqdGkiOiI4N2ExYjkxOS1jODlmLTQzNjMtOGRkOS00MjkzNDE3ZDRjNzIiLCJpZCI6NTUyMDkwLCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3OTUwMDkzMjN9.crDnPsRtQP_YNs__ujX5ugLVs3Bq3CSisclhtdG5tj0";
@@ -26,7 +32,7 @@ async function startApp(){
         baseLayerPicker:true
     });
 
-    // 初始镜头定位到澜沧江区域（不锁死视野，可以拖到全球）
+    //初始镜头定位澜沧江，完整地球
     const lancangExtent = Cesium.Rectangle.fromDegrees(94, 22, 101, 35);
     viewer.camera.flyTo({
         destination:lancangExtent,
@@ -34,7 +40,7 @@ async function startApp(){
         duration:1
     });
 
-    //蓝色河线串联全部5个标点，中国境内澜沧江
+    //澜沧江河线坐标
     const riverCoords = [
         [94.78,33.85],   //①源头
         [95.40,32.90],
@@ -90,7 +96,36 @@ async function startApp(){
             orientation:{heading:0,pitch:Cesium.Math.toRadians(-35),roll:0},
             duration:2.2
         })
-    })
+    });
+
+    // ========== 沿河自动漫游功能 ==========
+    let flyCompleteCallback;
+    function startRiverFly(){
+        let idx = 0;
+        function next(){
+            if(idx >= riverCoords.length){
+                if(flyCompleteCallback) flyCompleteCallback();
+                return;
+            }
+            const [lon,lat] = riverCoords[idx];
+            viewer.camera.flyTo({
+                destination:Cesium.Cartesian3.fromDegrees(lon,lat,16000),
+                orientation:{heading:0,pitch:Cesium.Math.toRadians(-42),roll:0},
+                duration:1.6,
+                complete:function(){
+                    idx++;
+                    next();
+                }
+            })
+        }
+        next();
+    }
+    function stopRiverFly(){
+        viewer.camera.cancelFlight();
+    }
+
+    document.getElementById("playBtn").onclick = startRiverFly;
+    document.getElementById("stopBtn").onclick = stopRiverFly;
 }
 
 startApp();
